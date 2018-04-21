@@ -1,0 +1,3 @@
+[submodule "microGAPPS"]
+	path = microGAPPS
+	url = https://github.com/fuldaros/googlebreak_repo.git
