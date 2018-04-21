@@ -15,7 +15,8 @@ show_progress() {
 echo "progress $1 $2" > $OUTFD; 
 }
 cleanup() { 
-rm -rf /tmp/googlebr; 
+rm -rf /tmp/googlebr;
+rm -rf /data/dalvik-cache
 }
 abort() {
   ui_print "$*";
@@ -54,17 +55,52 @@ if ! is_mounted '/system'; then
 mount '/system'
 fi
 sleep 3;
+ui_print "********************************";
+ui_print "  >> Removing GAPPS...";
+for gap in "etc/permissions/com.google.android.maps.xml" \
+"etc/permissions/com.google.android.media.effects.xml" \
+"etc/permissions/com.google.widevine.software.drm.xml" \
+"etc/preferred-apps/google.xml" "framework/com.google.android.maps.jar" \
+"framework/com.google.android.media.effects.jar" \
+"framework/com.google.widevine.software.drm.jar" "lib/libfilterpack_facedetect.so"; do
+if ! [ -f /system/$gap ];
+then
+echo "nope";
+else
+ui_print "-- "$gap"";
+rm -rf /system/$gap
+sleep 1;
+fi
+done
+for gap in "app/GoogleContactsSyncAdapter/" "app/GoogleContactsSync/" \
+"app/GoogleCalendarSyncAdapter/" "app/GoogleCalendarSync/" \
+"priv-app/GoogleBackupTransport/" "priv-app/GoogleFeedback/" \
+"priv-app/GoogleLoginService/" "priv-app/GoogleOneTimeInitializer/" \
+"priv-app/GooglePartnerSetup/" "priv-app/GoogleServicesFramework/" \
+"priv-app/PrebuiltGmsCore/" "priv-app/SetupWizard/" "priv-app/talkback/"; do
+if ! [ -d /system/$gap ];
+then
+echo "nope";
+else
+ui_print "-- "$gap"";
+rm -rf /system/$gap
+sleep 1;
+fi
+done
+ui_print "********************************";
+ui_print "  >> Installing microGAPPS...";
 ui_print "   >> installing framework's"; 
 cp -rf /tmp/googlebr/br-google/include/etc/* /system/etc
 cp -rf /tmp/googlebr/br-google/include/framework/com.google.android.maps.jar /system/framework
 sleep 1;
-ui_print "   >> installing app's";
 ui_print "********************************";
+ui_print "   >> installing app's";
 sleep 1;
 for app in GsfProxy nlpBackendDejavu; do
 ui_print "***"
-if [ $? != 0 -o -z "$(ls /system/app/"$app")" ]; 
+if ! [ -d /system/app/"$app" ]; 
 then
+echo "nope"
 ui_print "   >> installing "$app"...";
 else
 ui_print " > cleaning /system/app/"$app"";
@@ -81,8 +117,9 @@ sleep 1;
 done
 for app in DroidGuard GmsCore Phonesky; do
 ui_print "***"
-if [ $? != 0 -o -z "$(ls /system/priv-app/"$app")" ]; 
+if ! [ -d /system/priv-app/"$app" ]; 
 then
+echo "nope"
 ui_print "   >> installing "$app"...";
 else
 ui_print " > cleaning /system/priv-app/"$app"";
@@ -98,10 +135,7 @@ ui_print "   << "$app" installed!";
 sleep 1;
 done
 ui_print "********************************";
-ui_print "  >> cleaning...";
 cleanup;
 sleep 2;
-ui_print "  >>> <<<";
-sleep 1;
-ui_print "  >>> Install complete!";
+ui_print "  >>> Install complete! <<<";
 ui_print "********************************";
