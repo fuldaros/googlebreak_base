@@ -1,0 +1,30 @@
+#!/bin/bash
+ver=1.0
+date=$(date +"%Y.%m.%d %H:%M")
+dates=$(date +"%Y.%m.%d-%H:%M")
+rm -rf build/
+echo "Make GoogleBreak started..."
+echo " >> Copying include..."
+mkdir -p build/br-google/apps
+mkdir -p build/br-google/include
+cp -rf include/* build/br-google/include/
+echo " >> Copying apps..."
+cp -rf microGAPPS/* build/br-google/apps
+echo " >> Creating META-INF..."
+mkdir -p build/META-INF/com/google/android
+echo " >> Copying proprietary..."
+cp -rf proprietary/* build/META-INF/com/google/android
+echo " >> Creating ZIP package..."
+mkdir out/
+mkdir tmp/
+cd build/
+echo "// GoogleBREAK version
+"$ver"
+// Build time
+"$date"" > srcinfo
+zip -r ../tmp/zip-1.zip *
+cd ../
+echo " >> Signing ZIP package..."
+java -jar "mg-tools/zipsigner.jar" "tmp/zip-1.zip" "out/GoogleBreak_"$ver"-"$dates".zip"
+rm -rf tmp/
+echo "  << DONE!"
