@@ -7,9 +7,15 @@ echo "Make GoogleBreak started..."
 echo " >> Copying include..."
 mkdir -p build/br-google/apps
 mkdir -p build/br-google/include
-cp -rf include/* build/br-google/include/
-echo " >> Copying apps..."
-cp -rf microGAPPS/* build/br-google/apps
+mkdir outapk/
+for app in DroidGuard GmsCore Phonesky GsfProxy nlpBackendDejavu; do
+echo " >> Building "$app"..."
+mkdir outapk/$app
+java -jar mg-tools/apktool.jar b microGAPPS/"$app"/"$app" -o outapk/$app/"$app".apk
+echo " >> Signing "$app"..."
+mkdir build/br-google/apps/$app
+java -jar mg-tools/signapk.jar mg-tools/testkey.x509.pem mg-tools/testkey.pk8 outapk/$app/"$app".apk build/br-google/apps/$app/"$app".apk
+done
 echo " >> Creating META-INF..."
 mkdir -p build/META-INF/com/google/android
 echo " >> Copying proprietary..."
